@@ -26,8 +26,11 @@ export class BooksController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
+  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    const book = await this.booksService.update(+id, updateBookDto);
+    if (!book) throw new NotFoundException('No book with ID ' + id);
+
+    return book;
   }
 
   @Delete(':id')

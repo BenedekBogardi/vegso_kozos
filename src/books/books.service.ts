@@ -3,8 +3,21 @@ import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
 
+import * as mysql from 'mysql2/promise';
+
+
 @Injectable()
 export class BooksService {
+  conn: mysql.Pool;
+
+  constructor() {
+    this.conn = mysql.createPool({
+      host: 'localhost',
+      user: 'root',
+      database: 'konyvtar',
+    })
+  }
+
   books: Book[] = [
     {
       id: 1,
@@ -34,6 +47,7 @@ export class BooksService {
   nextId = 5;
 
   create(createBookDto: CreateBookDto) {
+
     const newBook = {
       ...createBookDto,
       id: this.nextId,
@@ -44,24 +58,36 @@ export class BooksService {
     return newBook;
   }
 
-  findAll() {
-    return this.books;
+  async findAll() {
+    const [ data ] = await this.conn.query('SELECT * FROM books');
+    return data;
   }
 
   findOne(id: number) {
     return this.books.find(book => book.id == id);
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    const index = this.books.findIndex(book => book.id == id);
-    if (index == -1) return undefined;
+  async update(id: number, updateBookDto: UpdateBookDto) {
+    const [ data ] = await this.conn.query(
+      'SELECT * FROM books WHERE id = ?',
+      [ id ]
+    );
+    const books = data as Book[];
+
+    if (books.length != 1) return undefined;
 
     const newBook = {
-      ...this.books[index],
+      ...books[0],
       ...updateBookDto,
     }
 
-    this.books[index] = newBook;
+    await this.conn.query(
+      `
+      UPDATE books SET title = ?, author = ?, isbn = ?, publishYear = ?, reserved = ?
+      WHERE id = ?
+      `,
+      [newBook.title, newBook.author, newBook.isbn, newBook.publishYear, newBook.reserved, newBook.id]
+    )
 
     return newBook;
   }
