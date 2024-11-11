@@ -18,8 +18,8 @@ export class BooksController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    const book = this.booksService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const book = await this.booksService.findOne(+id);
     if (!book) throw new NotFoundException('No book with ID ' + id);
 
     return book;
@@ -35,8 +35,8 @@ export class BooksController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    const success = this.booksService.remove(+id);
+  async remove(@Param('id') id: string) {
+    const success = await this.booksService.remove(+id);
     if (!success) {
       throw new NotFoundException('No book with ID ' + id);
     }
