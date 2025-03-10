@@ -13,12 +13,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Book {
+model Concert {
   id Int @id @default(autoincrement())
-  title String
-  author String
-  isbn String @db.VarChar(30)
-  publishYear Int @db.Year
-  reserved Boolean @default(false)
+  performer String
 }
 
