@@ -12,6 +12,8 @@ export class ConcertService {
   }
 
   create(createConcertDto: CreateConcertDto) {
+    const modifiedStartTime = createConcertDto.startTime + 'Z';
+    createConcertDto.startTime = modifiedStartTime;
     return this.db.concert.create({
       data: createConcertDto
     })
