@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException, HttpCode } from '@nestjs/common';
 import { ConcertService } from './concert.service';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
@@ -18,17 +18,27 @@ export class ConcertController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.concertService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const concert = await this.concertService.findOne(+id);
+    if (!concert) throw new NotFoundException('No concert with ID ' + id);
+
+    return concert;
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateConcertDto: UpdateConcertDto) {
-    return this.concertService.update(+id, updateConcertDto);
+  async update(@Param('id') id: string, @Body() updateConcertDto: UpdateConcertDto) {
+    const concert = await this.concertService.update(+id, updateConcertDto);
+    if (!concert) throw new NotFoundException('No concert with ID ' + id);
+
+    return concert;
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.concertService.remove(+id);
+  @HttpCode(204)
+  async remove(@Param('id') id: string) {
+    const success = await this.concertService.remove(+id);
+    if (!success) {
+      throw new NotFoundException('No concert with ID ' + id);
+    }
   }
 }

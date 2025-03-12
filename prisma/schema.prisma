@@ -16,5 +16,8 @@ datasource db {
 model Concert {
   id Int @id @default(autoincrement())
   performer String
+  startTime DateTime
+  duration Int
+  cancelled Boolean @default(false)
 }
 
