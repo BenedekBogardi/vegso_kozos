@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateConcertDto {
   @IsNotEmpty()
@@ -6,8 +6,8 @@ export class CreateConcertDto {
   performer: string;
 
   @IsNotEmpty()
-  @IsDate()
-  startTime: Date;
+  @IsDateString()
+  startTime: string;
 
   @IsNotEmpty()
   @IsNumber()

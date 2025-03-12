@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateConcertDto } from './dto/create-concert.dto';
 import { UpdateConcertDto } from './dto/update-concert.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -10,7 +10,7 @@ export class ConcertService {
   constructor(db: PrismaService) {
     this.db = db;
   }
-  
+
   create(createConcertDto: CreateConcertDto) {
     return this.db.concert.create({
       data: createConcertDto
@@ -30,13 +30,23 @@ export class ConcertService {
   }
 
   async update(id: number, updateConcertDto: UpdateConcertDto) {
+    const currentConcert = await this.db.concert.findUnique({ where: { id } });
+
+    if (currentConcert && currentConcert.cancelled === true && updateConcertDto.cancelled === true) {
+      throw new ConflictException('A koncert már elmaradt.');
+    }
     try {
       return await this.db.concert.update({
         where: { id },
         data: updateConcertDto
       });
     } catch {
-      return undefined;
+      if(isNaN(id)){
+        throw new HttpException('Invalid ID: must be a number', HttpStatus.BAD_REQUEST);
+      }
+      else if(id<0){
+        throw new HttpException('Invalid ID: cannot be negative', HttpStatus.BAD_REQUEST);
+      }
     }
   }
 
